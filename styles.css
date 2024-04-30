@@ -1,0 +1,20 @@
+body {
+    background-color: #040D12;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+#container {
+    background-color: #183D3D;
+    color:antiquewhite;
+    width: 60rem;
+    margin: 1rem;
+    padding-left : 8rem;
+    padding-right: 8rem;
+    border-radius: 1rem;
+}
+h1,h2,h3 {
+    text-align: center;
+}
