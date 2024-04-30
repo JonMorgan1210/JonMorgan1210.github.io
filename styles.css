@@ -15,6 +15,15 @@ body {
     padding-right: 8rem;
     border-radius: 1rem;
 }
+
+a {
+    color: antiquewhite;   
+}
+
+a:hover {
+    color: aliceblue;
+}
+
 h1,h2,h3 {
     text-align: center;
 }
