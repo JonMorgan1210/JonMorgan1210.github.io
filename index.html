@@ -109,8 +109,9 @@
           have enough entries or because they aren't useful to us. Execute the
           following in order to get rid of them:
         </p>
-        <code class="language-python"
-          >mass_shootings_5 = mass_shootings_5.drop(columns=['Title', 'S#',
+
+        <code class="language-python">
+          mass_shootings_5 = mass_shootings_5.drop(columns=['Title', 'S#',
           'Incident Area', 'Summary', 'Fatalities', 'Injured', 'Age', 'Employeed
           (Y/N)', 'Employed at', 'Latitude', 'Longitude'])</code
         >
@@ -211,13 +212,13 @@ def fix_cause(cause):
           </code>
         </pre>
         <p>And run this:</p>
-        <code class="language-python"
-          >mass_shootings_5['Location'] =
+        <code class="language-python">
+          mass_shootings_5['Location'] =
           mass_shootings_5['Location'].replace(states)</code
         >
         <p>Now as a final touch we will rename the "Total victims" column:</p>
-        <code class="language-python"
-          >us_mass_shootings = mass_shootings_5.rename(columns={'Total victims':
+        <code class="language-python">
+          us_mass_shootings = mass_shootings_5.rename(columns={'Total victims':
           'Total Victims'})</code
         >
         <p>
@@ -319,12 +320,13 @@ def fix_cause(cause):
           relationship. So, we must use the chi-squared test.
         </p>
         <p>To run Chi-Squared test run the following code:</p>
-        <code class="language-python"
-          >chi2, p_value, dof, ex = chi2_contingency(contingency_table)</code
+        <code class="language-python">
+          chi2, p_value, dof, ex = chi2_contingency(contingency_table)</code
         >
         <p>
           Now if you display the p_value by running
-          <code class="language-python">p_value</code>, then <code>0.48715665898535343</code>
+          <code class="language-python">p_value</code>, then
+          <code>0.48715665898535343</code>
           will be displayed
         </p>
         <p>
@@ -332,14 +334,134 @@ def fix_cause(cause):
           are that we can reject the null hypothesis. It's actually more like
           the probability that the alternative hypothesis is just a coincidence
           or error, but I feel like my previous definition is slightly easier to
-          understand. We want this value be below .05 (<a href="https://resources.nu.edu/statsresources/alphabeta#:~:text=Alpha%20is%20also%20known%20as,being%20compared%20to%2C%20for%20example.">alpha value</a>), which means we are highly
-          confident in rejecting the null hypothesis. To learn more about
-          p-values click the <a href="https://www.investopedia.com/terms/p/p-value.asp#:~:text=A%20p%2Dvalue%20is%20a%20statistical%20measurement%20used%20to%20validate,significance%20of%20the%20observed%20difference.">here</a>.
+          understand. We want this value be below .05 (<a
+            href="https://resources.nu.edu/statsresources/alphabeta#:~:text=Alpha%20is%20also%20known%20as,being%20compared%20to%2C%20for%20example."
+            >alpha value</a
+          >), which means we are highly confident in rejecting the null
+          hypothesis. To learn more about p-values click the
+          <a
+            href="https://www.investopedia.com/terms/p/p-value.asp#:~:text=A%20p%2Dvalue%20is%20a%20statistical%20measurement%20used%20to%20validate,significance%20of%20the%20observed%20difference."
+            >here</a
+          >.
+        </p>
+        <p>
+          Since it isn't below .05 we fail to reject our null hypothesis, so we
+          can't definitevily say that there is a connection between the two
+          features based on this. So, there is no direct relation between the
+          target and if the shooter has mental health issues.
+        </p>
+        <hr class="hr" />
+        <h3>The Location and Number of Injuries</h3>
+        <p>
+          Next we are going to see if there is a relationship between the number
+          of injuries and whether or not the shooting took place in an open or
+          closed location. A closed location are places that are usually
+          indoors, like a mall, or building, and an open location is usually
+          outdoors, so a beach or parking lot.
+        </p>
+        <p>
+          In order to do this, we are going to use a Mann-Whitney U test. This
+          is because the two features are independent from eachother and not
+          normally distributed. This is once again a good test to use when you
+          want to compare two features. To learn more about Mann-Whitney U test,
+          click
+          <a
+            href="https://www.statisticssolutions.com/free-resources/directory-of-statistical-analyses/mann-whitney-u-test/#:~:text=Mann%2DWhitney%20U%20test%20is,means%20are%20equal%20or%20not."
+            >here</a
+          >
+        </p>
+        <p>
+          Once again we are going to define our null and alternative hpothesis:
+        </p>
+        <ul>
+          <li>
+            <b>H<sub>0</sub></b
+            >: The location being opened or closed has no affect on the amount
+            of injuries.
+          </li>
+          <li>
+            <b>H<sub>A</sub></b
+            >: The location being opened or closed has an affect on the amount
+            of injuries.
+          </li>
+        </ul>
+        <p>
+          Before doing the test though lets try and visualize the relationship
+          with the use of a box plot. We'll start by seperating the opened and
+          closed data:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+          open_location = us_mass_shootings[us_mass_shootings['Open/Close Location'] == 'Open']['Total Victims'] 
+          closed_location =us_mass_shootings[us_mass_shootings['Open/Close Location'] == 'Close']['Total Victims']
+          </code>
+        </pre>
+        <p>We can now create the box plot with the following:</p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            plt.xlabel('Open/Close Location')
+            plt.ylabel('Total Victims')
+            plt.title('Boxplot of Total Victims by Open/Close Location')
+            plt.boxplot([us_mass_shootings[us_mass_shootings['Open/Close Location'] == 'Open']['Total Victims'], us_mass_shootings[us_mass_shootings['Open/Close Location'] == 'Close']['Total Victims']],
+                        labels=['Open', 'Closed'])
+            
+            plt.show()
+          </code>
+        </pre>
+        <p>This is the box plot we get:</p>
+        <img style="height: 25rem" src="imgs/zoomedOut-boxplt.jpg" />
+        <p>
+          From this we can really see anything because there are some pretty
+          high outliers which are affecting the distribution of the data, but
+          can zoom in a little bit so that I can actually see the box plots with
+          the following:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            plt.boxplot([us_mass_shootings[us_mass_shootings['Open/Close Location'] == 'Open']['Total Victims'], us_mass_shootings[us_mass_shootings['Open/Close Location'] == 'Close']['Total Victims']],
+            labels=['Open', 'Closed'])
+            plt.xlabel('Open/Close Location')
+            plt.ylabel('Total Victims')
+            plt.title('Boxplot of Total Victims by Open/Close Location')
+            plt.ylim(0,50)
+            plt.show()
+          </code>
+        </pre>
+        <p>Our plot now looks like this:</p>
+        <img style="height: 25rem" src="imgs/zoomedIn-boxplt.jpg" alt="" />
+        <p>
+          We can see the actual data in the box plots much better now. In the
+          plots we can see that they both are right skewed, so on average both
+          open and closed locations are greater than their medians. The open
+          location box plot is most likely more skewed because it has much
+          higher outliers than the closed location. The outliers in this dataset
+          may cause us some problems, so it is something we should look out for
+          if need be in later sections.
+        </p>
+        <p>
+          Now lets find our p-value so that we can see if we can reject or fail
+          to reject our null hypothesis (alpha value is once again .05). To do
+          this, run the following:
+        </p>
+        <code class="language-python"
+          >statistic, p_value = mannwhitneyu(open_location, closed_location)
+        </code>
+        <p>
+          If we display the p-value by running
+          <code class="language-python">p_value</code>, we get
+          <code>0.03603286133592586.</code>
+        </p>
+        <p>
+          Our p-value is less than the alpha (.05) so we reject the null
+          hypothesis. This means that there is some relationship between whether
+          the location is opened or closed and the amount of victims harmed. We
+          can explore this more in the Machine Learning section, and use this to
+          help our analysis.
         </p>
       </div>
       <hr />
       <div id="primary-analysis">
-        <h2>Primary Analysis:</h2>
+        <h2>Machine Learning:</h2>
       </div>
       <hr />
       <div id="visualization">
