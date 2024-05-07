@@ -211,13 +211,131 @@ def fix_cause(cause):
           </code>
         </pre>
         <p>And run this:</p>
-        <code class="language-python">mass_shootings_5['Location'] = mass_shootings_5['Location'].replace(states)</code>
+        <code class="language-python"
+          >mass_shootings_5['Location'] =
+          mass_shootings_5['Location'].replace(states)</code
+        >
         <p>Now as a final touch we will rename the "Total victims" column:</p>
-        <code class="language-python">us_mass_shootings = mass_shootings_5.rename(columns={'Total victims': 'Total Victims'})</code>
+        <code class="language-python"
+          >us_mass_shootings = mass_shootings_5.rename(columns={'Total victims':
+          'Total Victims'})</code
+        >
+        <p>
+          Now if you run
+          <code class="language-python">mass_shootings_5.head(10)</code> again,
+          it should look like:
+        </p>
+        <img src="imgs/formatted-df.jpg" alt="" />
       </div>
       <hr />
       <div id="data-analysis">
         <h2>Data Analysis:</h2>
+        <p>
+          In this section we want to learn more about the data. So are there any
+          correlations, trends, or insights that we can find? With this new
+          information we can better set up our primary analysis. Since I want to
+          be able to find relationships between our columns, most of our
+          analysis here will be trying to see if any of our features correlates
+          with one another. We will do this through the use of multiple
+          techniques that will provide some valuable insights.
+        </p>
+        <hr class="hr" />
+        <h3>The Target and Presence of Mental Health Issues</h3>
+        <p>
+          Here we are going to see if there is any correlation between the
+          target of a shooting, and whether or not the shooter has some kind of
+          mental health issue. In order to do this we will use chi-squared test.
+        </p>
+        <p>
+          Chi-Squared test are used to check if two categorical variables come
+          from the same distribution. This means that we should be able to see
+          if there is some kind of relationship between the two features. If you
+          want to learn more about chi-squared question click
+          <a
+            href="https://www.bmj.com/about-bmj/resources-readers/publications/statistics-square-one/8-chi-squared-tests"
+            >here</a
+          >
+        </p>
+        <p>
+          First lets define our null and alternative hypothesis. The null
+          hypothesis (H<sub>0</sub>) is what we are trying to disprove and the
+          alternative hypothesis (H<sub>A</sub>) is what we are trying to prove.
+        </p>
+        <ul>
+          <li>
+            <b>H<sub>0</sub></b
+            >: The mental health of a shooter has an effect on the target of a
+            mass shooting.
+          </li>
+          <li>
+            <b>H<sub>A</sub></b
+            >: The mental health of a shooter does have an effect on the target
+            of a mass shooting.
+          </li>
+        </ul>
+        <p>
+          In order to effectively use this test we will put our data in a
+          contingency table. Contingency tables place one variable on one exis,
+          and another variable on the other. This format allows relationships
+          between the data to be more identifiable. Click
+          <a href="https://en.wikipedia.org/wiki/Contingency_table">here</a> to
+          learn more about contingency tables.
+        </p>
+        <p>Run this in order to create our table:</p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            new_df = us_mass_shootings[(us_mass_shootings['Mental Health Issues'] == 'Yes') | (us_mass_shootings['Mental Health Issues'] == 'No')]
+            contingency_table = pd.crosstab(new_df['Target'], new_df['Mental Health Issues'])
+          </code>
+        </pre>
+        <p>
+          If you now display the table with
+          <code class="language-python">contingency_table</code>, then it should
+          look like this:
+        </p>
+        <img style="height: 25rem" src="imgs/contingency_table.jpg" />
+        <p>
+          Before we figure out whether or not we can prove there is some
+          relationship, let's visualize the data with a bar graph. To do this,
+          use the following code:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            plot = contingency_table.plot(kind='bar', title='Relationship Between Target and Mental Health Issues')
+            plot.set_xlabel("Target of Shooting")
+            plot.set_ylabel("# of Shootings With/Without Mental Health Issues")
+          </code>
+        </pre>
+        <p>This should display the following graph:</p>
+        <img style="height: 40rem" src="imgs/contingency_plot.png" />
+        <p>
+          From this graph we can see that certain target such as "Random",
+          "School", and "Ex-Person(s)" have a much higher number of shootings
+          that involve mental health issues. While other targets, "Family" and
+          "Relationship (non-familial)", have a higher rate of shootings that
+          don't involve mental health issues. Although there is evidence of
+          higher and lower occurences depending on the target based on this
+          graph, it is not enough for us to conclude that there is some
+          relationship. So, we must use the chi-squared test.
+        </p>
+        <p>To run Chi-Squared test run the following code:</p>
+        <code class="language-python"
+          >chi2, p_value, dof, ex = chi2_contingency(contingency_table)</code
+        >
+        <p>
+          Now if you display the p_value by running
+          <code class="language-python">p_value</code>, then <code>0.48715665898535343</code>
+          will be displayed
+        </p>
+        <p>
+          What does this value mean? The p value is essential how confident we
+          are that we can reject the null hypothesis. It's actually more like
+          the probability that the alternative hypothesis is just a coincidence
+          or error, but I feel like my previous definition is slightly easier to
+          understand. We want this value be below .05 (<a href="https://resources.nu.edu/statsresources/alphabeta#:~:text=Alpha%20is%20also%20known%20as,being%20compared%20to%2C%20for%20example.">alpha value</a>), which means we are highly
+          confident in rejecting the null hypothesis. To learn more about
+          p-values click the <a href="https://www.investopedia.com/terms/p/p-value.asp#:~:text=A%20p%2Dvalue%20is%20a%20statistical%20measurement%20used%20to%20validate,significance%20of%20the%20observed%20difference.">here</a>.
+        </p>
       </div>
       <hr />
       <div id="primary-analysis">
