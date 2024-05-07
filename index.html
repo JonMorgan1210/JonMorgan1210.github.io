@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jonathan Morgan Final Project</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link href="prism-correct.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="container">
+      <div id="header">
+        <h1>An Evaluation of Shootings in the United States</h1>
+        <h3>Jonathan Morgan</h3>
+        <h3>Spring 2024 Data Science Project</h3>
+      </div>
+      <hr />
+      <div id="intro">
+        <h2>Introduction:</h2>
+        <p>
+          Over the past decade shootings have only increased. This has become a
+          very big issue in the United States, and has had a profound impact on
+          many individuals and the country as a whole. There are many different
+          opinions on what a proper solution is, such as banning guns
+          completelty, investing into more extensive background checks, or
+          putting more focus on mental health. While a solution is being argued
+          over, shootings still occur regularly with no change. In this project
+          I am not seeking a solution, but instead seeking to find valuable
+          insights and trends regarding what qualities are common among most
+          active shooters, race, genger, mental health, etc. This data will
+          assist in finding a solution because it provides valuable information
+          about what exactly “makes” an active shooter. Knowing this can help
+          pinpoint which direction a possible solution to this issue should
+          point.
+        </p>
+        <br />
+        <b>Sections:</b>
+        <ol>
+          <li><a href="#intro">Introduction</a></li>
+          <li><a href="#data-curation">Data Curation</a></li>
+          <li><a href="#data-analysis">Exploratory Data Analysis</a></li>
+          <li><a href="#primary-analysis">Primary Analysis</a></li>
+          <li><a href="#visualization">Visualization</a></li>
+          <li><a href="#conclusion">Insights and Conclusion</a></li>
+        </ol>
+      </div>
+      <hr />
+      <div id="data-curation">
+        <h2>Data Curation:</h2>
+        <p>
+          We will be using <b>Google Colab</b> for this tutorial. It is provides
+          use with free acces to computing resources that are well suited for
+          data science and machine learning. Follow
+          <a href="https://colab.research.google.com/" target="”_blank”"
+            >this</a
+          >
+          link to learn more about the service if you don't, or to get a feel
+          for the UI and tools before continuing. Once you've done that create a
+          new Colab and name it whatever you'd like.
+        </p>
+        <p>
+          These are all the imports we will be using in this tutorial, add them
+          to your Colab and run the cell:
+        </p>
+        <pre class="line-numbers">
+            <code class="language-python">
+                import pandas as pd
+                import matplotlib.pyplot as plt
+                import numpy as np 
+                from scipy.stats import chi2_contingency
+                from scipy.stats import mannwhitneyu
+                from scipy.stats import kruskal
+                import statsmodels.api as sm
+            </code>
+          </pre>
+        <hr class="hr" />
+        <h3>Gathering Data:</h3>
+        <p>
+          First we need to gather data shootings in the United States. This data
+          needs to contain a decent amount of information about the shooting as
+          well as the shooter so that we can have more data to work with later
+          on. I was able to find pretty good data set on Kaggle that contains
+          data on US shootings for the past 50 years. Follow
+          <a
+            target="”_blank”"
+            href="https://www.kaggle.com/datasets/zusmani/us-mass-shootings-last-50-years/data"
+            >this</a
+          >
+          link to download the data and add it to your Colab. We specifically
+          only want Dataset Ver 5, so only include that one.
+        </p>
+        <p>
+          After you've done that we need to run the following in order to create
+          a dataframe with our csv file:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            mass_shootings_5 = pd.read_csv('Mass Shootings Dataset Ver 5.csv', encoding='cp1252')
+          </code>
+        </pre>
+        <p>
+          If you run
+          <code class="language-python">mass_shootings_5.head(10)</code> your
+          data frame should look like this:
+        </p>
+        <img src="imgs/unformatted-df.jpg" />
+        <p>
+          There are many columns that we don't need or want because they don't
+          have enough entries or because they aren't useful to us. Execute the
+          following in order to get rid of them:
+        </p>
+        <code class="language-python"
+          >mass_shootings_5 = mass_shootings_5.drop(columns=['Title', 'S#',
+          'Incident Area', 'Summary', 'Fatalities', 'Injured', 'Age', 'Employeed
+          (Y/N)', 'Employed at', 'Latitude', 'Longitude'])</code
+        >
+        <p>
+          Now we need to edit some of our columns because the data in them isn't
+          properly formatted. The "location" column includes the city, which we
+          don't really care for, so we need remove it, and the "target" and
+          "cause" columns vary too much in their categories so we need to
+          condense them into more broad categories.
+        </p>
+        <p>In order to do this I have created the following three functions:</p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            def remove_city(location):
+  if str(location) != 'nan':
+    splitted_loc = location.split()
+    if splitted_loc[-2] in ['New', 'North', 'Rhode', 'South', 'West']:
+      state = splitted_loc[-2] + ' ' + splitted_loc[-1]
+    else:
+      state = splitted_loc[-1]
+    return state
+
+def fix_target(target):
+  target = str(target).lower()
+
+  if target != 'nan':
+    if ('ex-' in target):
+      target = 'Ex-Person(s)'
+    elif (('teacher' in target) | ('student' in target) | ('teachers' in target) | ('students' in target) | ('school' in target)):
+      target = 'School'
+    elif ('child' in target):
+      target = 'Children'
+    elif (('congress' in target) | ('police' in target) | ('council' in target) | ('social worker' in target) | ('tsa' in target) | ('marine' in target)):
+      target = 'Government Employee(s)'
+    elif (('coworker' in target) | ('friend' in target) | ('neighbor' in target) | ('guest' in target) | ('employee' in target)):
+      target = 'Relationship (non-familial)'
+    elif ('family' in target):
+      target = 'Family'
+    elif ('random' in target):
+      target = 'Random'
+    elif ('women' in target):
+      target = 'Women'
+    elif (('black' in target) | ('white' in target) | ('sikhs' in target) | ('monk' in  target) | ('pray' in target)):
+      target = 'Race/Religion'
+    else:
+      target = 'Other'
+
+    return target
+
+def fix_cause(cause):
+  cause = str(cause).lower()
+
+  if ('frustration' == cause):
+    cause = 'anger'
+  elif ('nan' == cause):
+    cause = 'unknown'
+  elif (('domestic' in cause) | ('breakup' == cause)):
+    cause = 'domestic'
+  elif (('exam' in cause) | ('suspension' == cause)):
+    cause = 'school'
+
+  return cause
+          </code>
+        </pre>
+        <p>
+          Add these functions to your collab and run the following in order to
+          fix the columns:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            mass_shootings_5['Location'] = mass_shootings_5['Location'].apply(remove_city)
+            mass_shootings_5['Target'] = mass_shootings_5['Target'].apply(fix_target)
+            mass_shootings_5['Cause'] = mass_shootings_5['Cause'].apply(fix_cause)
+          </code>
+        </pre>
+        <p>
+          There are some more issues with "Location" column that we need to fix.
+          We've gotten rid of the city, but the state is inconsistent. Sometimes
+          it is abbreviated, and sometimes it is not. We need this to be
+          consistent, so we are going to replace the abbreviations.
+        </p>
+        <p>In order to do this, use the following dictionary:</p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            states = {
+              'AK': 'Alaska','AL': 'Alabama','AR': 'Arkansas','AZ': 'Arizona','CA': 'California',
+              'CO': 'Colorado','CT': 'Connecticut','DC': 'District of Columbia','DE': 'Delaware','FL': 'Florida',
+              'GA': 'Georgia','HI': 'Hawaii','IA': 'Iowa','ID': 'Idaho','IL': 'Illinois',
+              'IN': 'Indiana','KS': 'Kansas','KY': 'Kentucky','LA': 'Louisiana','MA': 'Massachusetts',
+              'MD': 'Maryland','ME': 'Maine','MI': 'Michigan','MN': 'Minnesota','MO': 'Missouri',
+              'MS': 'Mississippi','MT': 'Montana','NC': 'North Carolina','ND': 'North Dakota','NE': 'Nebraska',
+              'NH': 'New Hampshire','NJ': 'New Jersey','NM': 'New Mexico','NV': 'Nevada','NY': 'New York',
+              'OH': 'Ohio','OK': 'Oklahoma','OR': 'Oregon','PA': 'Pennsylvania','RI': 'Rhode Island',
+              'SC': 'South Carolina','SD': 'South Dakota','TN': 'Tennessee','TX': 'Texas','UT': 'Utah',
+              'VA': 'Virginia','VT': 'Vermont','WA': 'Washington','WI': 'Wisconsin','WV': 'West Virginia',
+              'WY': 'Wyoming','PR': 'Puerto Rico','VI': 'Virigin Islands', 'D.C.': 'District of Columbia'
+              }
+          </code>
+        </pre>
+        <p>And run this:</p>
+        <code class="language-python">mass_shootings_5['Location'] = mass_shootings_5['Location'].replace(states)</code>
+        <p>Now as a final touch we will rename the "Total victims" column:</p>
+        <code class="language-python">us_mass_shootings = mass_shootings_5.rename(columns={'Total victims': 'Total Victims'})</code>
+      </div>
+      <hr />
+      <div id="data-analysis">
+        <h2>Data Analysis:</h2>
+      </div>
+      <hr />
+      <div id="primary-analysis">
+        <h2>Primary Analysis:</h2>
+      </div>
+      <hr />
+      <div id="visualization">
+        <h2>Visualization</h2>
+      </div>
+      <hr />
+      <div id="conclusion">
+        <h2>Conclusion</h2>
+      </div>
+    </div>
+    <script src="prism-correct.js"></script>
+  </body>
+</html>
