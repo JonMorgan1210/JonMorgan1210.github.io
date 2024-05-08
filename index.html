@@ -64,6 +64,10 @@
         </p>
         <pre class="line-numbers">
             <code class="language-python">
+                ! pip install scikit-posthocs
+
+                import scikit_posthocs as sp
+                from sklearn.datasets import load_iris
                 import pandas as pd
                 import matplotlib.pyplot as plt
                 import numpy as np 
@@ -71,6 +75,13 @@
                 from scipy.stats import mannwhitneyu
                 from scipy.stats import kruskal
                 import statsmodels.api as sm
+                from scipy import stats
+                from sklearn.preprocessing import StandardScaler
+                from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
+                from sklearn.preprocessing import StandardScaler
+                from sklearn.tree import DecisionTreeClassifier
+                from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+                
             </code>
           </pre>
         <hr class="hr" />
@@ -458,12 +469,359 @@ def fix_cause(cause):
           can explore this more in the Machine Learning section, and use this to
           help our analysis.
         </p>
-        <hr class="hr">
-        <h3></h3>
+        <hr class="hr" />
+        <h3>Causes and the Number of Victims</h3>
+        <p>
+          For this analysis we want to compare the causes to the number of
+          victims in a shooting. We also want to see how those causes compare to
+          each other in realtion to the number of victims that they have. The
+          causes are basically the reason why the shooter commited the crime. So
+          things like "anger", "revenge", "domestic" disputes, etc.
+        </p>
+        <p>
+          We will do this with the use of an ANOVA test. We use ANOVA test in
+          order to compare different groups in order to see if there are any
+          significant differences. To learn more about ANOVA test, click
+          <a
+            href="https://www.investopedia.com/terms/a/anova.asp#:~:text=Key%20Takeaways-,Analysis%20of%20variance%20(ANOVA)%20is%20a%20statistical%20test%20used%20to,ANOVA%20uses%20two%20independent%20variables."
+            >here</a
+          >.
+        </p>
+        <p>
+          Before we do our test, lets visualize our data with a bar graph that
+          compares the average amount of victims in each cause along with the
+          overall average. First we need to create a dataframe with all of our
+          averages:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            averages = us_mass_shootings.groupby('Cause').agg({'Total Victims': 'mean'}).reset_index()
+            averages.columns = ['Cause', 'Average Total Victims']
+          </code>
+        </pre>
+        <p>It should look like this:</p>
+        <img style="height: 20rem" src="imgs/causes_averages.jpg" alt="" />
+        <p>
+          Now we want the overall mean between the categories, we can do that by
+          runnning this:
+        </p>
+        <code class="language-python"
+          >causes_mean = averages['Average Total Victims'].mean()
+        </code>
+        <p>
+          Finally, lets display our create and display our bar graph by running
+          the following:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            plot = averages.plot.bar(x='Cause', y='Average Total Victims')
+            plt.axhline(y=causes_mean, color='r', linestyle='-')
+            plt.ylabel('Average Total Victims')
+            plot
+          </code>
+        </pre>
+        <p>Our plot should look like this:</p>
+        <img style="height: 30rem" src="imgs/causes_avgs_plt.png" alt="" />
+        <p>
+          With this bar graph we can see the relationship between the different
+          causes and how they differ from each other when it comes to the
+          average amount of victims harmed. There are definetly some causes that
+          seem to cause much more harm than others, but we should use our ANOVA
+          test in order to be sure.
+        </p>
+        <p>
+          For our ANOVA test, we also need to define a null and alternative
+          hypothesis:
+        </p>
+        <ul>
+          <li>
+            <b>H<sub>0</sub></b
+            >: The means will be the same accross all groups, so the cause has
+            no affect on total victims.
+          </li>
+          <li>
+            <b>H<sub>A</sub></b
+            >: The means won't be the same accross all groups, so the cause has
+            an affect on total victims.
+          </li>
+        </ul>
+        <p>
+          Before we do our ANOVA test, we must ensure that all of our groups is
+          normally distributed, we can check anger by graphing it like so:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            dist = us_mass_shootings[us_mass_shootings['Cause'] == 'anger']['Total Victims']
+            sm.qqplot(dist)
+          </code>
+        </pre>
+        <p>The graph should look like this:</p>
+        <img style="height: 25rem" src="imgs/anova-dist.jpg" alt="" />
+        <p>
+          As we can see this isn't normally distributed, so we can't use an
+          ANOVA test, but we can use something similar called a Kruskal-Wallis
+          test. It's accomplishes the same, but without the need for normally
+          distributed data. You can learn more about Kruskal-Wallis test
+          <a
+            href="https://www.technologynetworks.com/informatics/articles/the-kruskal-wallis-test-370025#:~:text=The%20Kruskal%E2%80%93Wallis%20test%20is%20a%20statistical%20test%20used%20to,analysis%20of%20variance%20(ANOVA)."
+            >here</a
+          >.
+        </p>
+        <p>
+          We can run the test and obtain our p-value by doing the following:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            anger = us_mass_shootings[us_mass_shootings['Cause'] == 'anger']['Total Victims']
+            unemployement = us_mass_shootings[us_mass_shootings['Cause'] == 'unemployement']['Total Victims']
+            racism = us_mass_shootings[us_mass_shootings['Cause'] == 'racism']['Total Victims']
+            domestic =us_mass_shootings[us_mass_shootings['Cause'] == 'domestic']['Total Victims']
+            pyscho = us_mass_shootings[us_mass_shootings['Cause'] == 'psycho']['Total Victims']
+            revenge = us_mass_shootings[us_mass_shootings['Cause'] == 'revenge']['Total Victims']
+            school = us_mass_shootings[us_mass_shootings['Cause'] == 'school']['Total Victims']
+            religious_radicalism = us_mass_shootings[us_mass_shootings['Cause'] == 'religious radicalism']['Total Victims']
+            drunk = us_mass_shootings[us_mass_shootings['Cause'] == 'drunk']['Total Victims']
+            robbery = us_mass_shootings[us_mass_shootings['Cause'] == 'robbery']['Total Victims']
+            unknown = us_mass_shootings[us_mass_shootings['Cause'] == 'unknown']['Total Victims']
+            terrorism = us_mass_shootings[us_mass_shootings['Cause'] == 'terrorism']['Total Victims']
+            
+            stat, p_value = kruskal(anger, unemployement, racism, domestic, pyscho, revenge, school, religious_radicalism, drunk, robbery, unknown, terrorism)
+          </code>
+        </pre>
+        <p>
+          If you display the p-value with
+          <code class="language-python">p_value</code>, then we get
+          <code>2.1963291386413655e-05 </code>
+        </p>
+        <p>
+          Our alpha value is still .05, so this is significantly below that,
+          which means that we can reject our null hypothesis. This means that
+          there are differences between the causes in relation to the total
+          number of victims. So some causes like "terrorism" would have a higher
+          total victim count than "domestic" disputes.
+        </p>
+        <p>
+          We can confirm the significant differences between the groups with a
+          post-hoc test. This will basically give us the actual comparison
+          between groups so we can see just how different they are. If you want
+          to learn more about post-hoc test, click
+          <a
+            href="https://www.cwauthors.com/article/significance-and-use-of-post-hoc-analysis-studies#:~:text=Post%20hoc%20in%20Latin%20means,also%20called%20multiple%20comparison%20tests."
+            >here</a
+          >.
+        </p>
+        <p>The following code will create the results for our post-hoc test:</p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            data = pd.DataFrame({
+              'anger': anger.dropna(),
+              'unemployment': unemployement.dropna(),
+              'racism': racism.dropna(),
+              'domestic': domestic.dropna(),
+              'psycho': pyscho.dropna(),
+              'revenge': revenge.dropna(),
+              'school': school.dropna(),
+              'religious_radicalism': religious_radicalism.dropna(),
+              'drunk': drunk.dropna(),
+              'robbery': robbery.dropna(),
+              'unknown': unknown.dropna(),
+              'terrorism': terrorism.dropna()
+          })
+          
+          data = data.apply(lambda x: x.fillna(x.mean()))
+          data = data.melt(var_name='Cause', value_name='Total Victims').dropna()
+          results = sp.posthoc_dunn(data, val_col='Total Victims', group_col='Cause', p_adjust='bonferroni')
+          </code>
+        </pre>
+        <p>
+          Now we can display results with
+          <code class="language-python">results</code> which would give us a
+          kind of matrix with the p-values of each comparison. Instead of just
+          displaying that we will make it slightly easier to understand by
+          replacing the p-values with True and False. True if the p-value is
+          greater than .05, meaning that there is a significant difference, and
+          false if otherwise, meaning there isn't a significant difference.
+          Doing this is simple, just run the following:
+        </p>
+        <code class="language-python">resultsTF = results < .05 </code>
+        <p>
+          If you display the new dataframe with
+          <code class="language-python">resultsTF</code>, then your output
+          should look something like this:
+        </p>
+        <img src="imgs/post_hoc_results.jpg" alt="" />
+        <p>
+          From this you can see that a lot of our data has a significant
+          difference between features. This means that there is a meaningful
+          distinciton between the cause and the amount of victims for a lot of
+          our categories. This means that the cause does cause some difference
+          in the amount of victims resulting from the shooting, and here we can
+          see which causes actually have that difference.
+        </p>
+        <hr class="hr" />
+        <h3>Analysis Conclusion</h3>
+        <p>
+          After this analysis we can see that a lot of our data is categorical,
+          and we were able to point out some relationships between those
+          categories. From our final analysis we can seethat the cause does have
+          an effect on the number of total victims. We were also able to gather
+          from out second analysis that the location being open or closed had an
+          effect on the number of victims, with open locations having slightly
+          more. In thenext section we will use these insights in order to
+          determine what kind of machine learning analysis and function we will
+          use.
+        </p>
       </div>
       <hr />
       <div id="primary-analysis">
         <h2>Machine Learning:</h2>
+        <p>
+          Since we have collected, cleaned, and gained insights from our data,
+          we will now develop a Machine Learning model that shows how some of
+          our features contribute to how deadly a shooting can be. This will
+          enable us to figure out what features are correlated higher victim
+          totals. To do this we will use some machine learning techniques.
+        </p>
+        <hr class="hr" />
+        <h3>Creating our Model</h3>
+        <p>
+          In the previous section we were able to see that the Total Victims
+          feature can be affected by the cause and whether or not the location
+          is opened or closed. So we will mostly focus on that in this section.
+        </p>
+        <p>
+          This means that our independent variables will be our other features,
+          not Total Victims, and the dependent variable will be the Total
+          Victims.
+        </p>
+        <p>
+          First we have to decide what Machine Learning. Since we want to
+          predict a real valued continous feature, we should select some kind of
+          regression model. I think that a Decision Tree would be our best bet
+          because of the nature of our data, and what we want to do with it.
+          Given some categorical data we want to make a decision/estimate about
+          how many possible Victims could be in a shooting. A decision tree
+          seems best to accomplish this goal. To learn more about decision
+          trees, click
+          <a
+            href="https://www.lucidchart.com/pages/decision-tree#:~:text=A%20decision%20tree%20is%20a,costs%2C%20probabilities%2C%20and%20benefits."
+            >here</a
+          >.
+        </p>
+        <p>
+          First we need to split out data, and handle outliers. To do that we're
+          just going to exclude them:
+        </p>
+        <pre class="line-numbers">
+          <code class="'language-python">
+            data = us_mass_shootings.drop(columns=['Location', 'Date','Gender', 'Race', 'Target'], axis = 1)
+            # Z-score for each value in the column
+            z_scores = stats.zscore(data['Total Victims'])
+            
+            # threshold for the Z-score
+            threshold = 2
+            
+            # Filter rows
+            data = data[abs(z_scores) < threshold].dropna()
+            
+            data_x = data.drop('Total Victims', axis=1)
+            data_y = data['Total Victims']
+          </code>
+        </pre>
+        <p>
+          Now we are going to encode our data as well as create our training and
+          testing data. We need to encode the data because all of our other
+          features are categorical. We won't be able to properly train our
+          models with those, so we need to encode them. To learn more about what
+          exactly encoding is, click
+          <a
+            href="https://medium.com/anolytics/all-you-need-to-know-about-encoding-techniques-b3a0af68338b#:~:text=Encoding%20categorical%20variables%20is%20a,compatibility%20with%20machine%20learning%20algorithms."
+            >here</a
+          >.
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            data_x_encoded = pd.get_dummies(data_x, drop_first=True)
+            X_train, X_test, y_train, y_test = train_test_split(data_x_encoded, data_y, test_size=0.3, random_state=42)
+          </code>
+        </pre>
+        <p>
+          Next we'll define our model, and perform
+          <a
+            href="https://www.analyticsvidhya.com/blog/2022/02/k-fold-cross-validation-technique-and-its-essentials/#:~:text=K%2Dfold%20cross%2Dvalidation%20is,estimate%20the%20model's%20generalization%20performance."
+            >k-fold validation</a
+          >
+          to help evaluate our the model.
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            model = DecisionTreeClassifier()
+            k_folds = 5
+            skf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=42)
+            score = cross_val_score(model, X_train, np.ravel(y_train), cv=skf)
+            print("Decision Tree: " + str(score.mean()) + " ( +/- " + str(score.std()) + ")")
+          </code>
+        </pre>
+        <p>
+          Based on our output, we can see that our performance isn't very good,
+          <code>.23500000000000001</code>, lets try some other models to see if
+          they do any better:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            models = {'KNN': KNeighborsClassifier(),
+            'DecisionTree': DecisionTreeClassifier(),
+            'LogisticRegression': LogisticRegression(max_iter=1000),
+            'RandomForest': RandomForestClassifier()}
+
+            k_folds = 5
+            skf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=42)
+            for model_name, model in models.items():
+              score = cross_val_score(model, X_train, np.ravel(y_train), cv=skf)
+              print(model_name + ": " + str(score.mean()) + " ( +/- " + str(score.std()) + ")")
+          </code>
+        </pre>
+        <p>
+          The output of these other models are even worse, so lets stick with
+          the decision tree and see if we can improve its performance.
+        </p>
+        <hr class="hr" />
+        <h3>Training our Model</h3>
+        <p>
+          Now we have to use our training and test data in order to train and
+          evaluate our model. In order evaulate our model we will take a look at
+          its
+          <a
+            href="https://medium.com/@kohlishivam5522/understanding-a-classification-report-for-your-machine-learning-model-88815e2ce397"
+            >classification report</a
+          >.
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            # Train Model
+            model.fit(std_X_train, np.ravel(y_train))
+
+            # Evaluate performance
+            y_pred = model.predict(std_X_test)
+            accuracy = accuracy_score(y_pred, y_test)
+          
+            print("Accuracy of "+model_name+": "+str(accuracy))
+            print('Classification Report: ')
+            print(classification_report(y_test, y_pred, zero_division=1))
+          </code>
+        </pre>
+        <p>This is our output:</p>
+        <img style="height: 30rem" src="imgs/class_report.jpg" alt="" />
+        <p>
+          From this we can see that our model isn't the greatest, but it is very
+          <a
+            href="https://c3.ai/glossary/machine-learning/precision/#:~:text=Precision%20is%20one%20indicator%20of,the%20number%20of%20false%20positives)."
+            >precise</a
+          >. Especially when it comes to higher Victim Counts. This may be
+          because higher victim totals are more rare, making them easier to
+          predict that the more average victim totals.
+        </p>
+        <p></p>
       </div>
       <hr />
       <div id="visualization">
