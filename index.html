@@ -13,7 +13,7 @@
         <h1>An Evaluation of Shootings in the United States</h1>
         <h3>Jonathan Morgan</h3>
         <h3>Spring 2024 Data Science Project</h3>
-        <h4>Member 1(and only): Jonathan Morgan, Contribution: 100% (did to everything).</h4>
+        <h4>Member 1(and only): Jonathan Morgan, Contribution: 100% (did everything).</h4>
         <p>I did everything in the project, all html/css and colab/coding</p>
       </div>
       <hr />
@@ -24,12 +24,12 @@
           very big issue in the United States, and has had a profound impact on
           many individuals and the country as a whole. There are many different
           opinions on what a proper solution is, such as banning guns
-          completelty, investing into more extensive background checks, or
+          completely, investing into more extensive background checks, or
           putting more focus on mental health. While a solution is being argued
           over, shootings still occur regularly with no change. In this project
           I am not seeking a solution, but instead seeking to find valuable
           insights and trends regarding what qualities are common among most
-          active shooters, race, genger, mental health, etc. This data will
+          active shooters, race, gender, mental health, etc. This data will
           assist in finding a solution because it provides valuable information
           about what exactly “makes” an active shooter. Knowing this can help
           pinpoint which direction a possible solution to this issue should
@@ -51,7 +51,7 @@
         <h2>Data Curation:</h2>
         <p>
           We will be using <b>Google Colab</b> for this tutorial. It is provides
-          use with free acces to computing resources that are well suited for
+          use with free access to computing resources that are well suited for
           data science and machine learning. Follow
           <a href="https://colab.research.google.com/" target="”_blank”"
             >this</a
@@ -83,7 +83,7 @@
                 from sklearn.preprocessing import StandardScaler
                 from sklearn.tree import DecisionTreeClassifier
                 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-                
+                from sklearn.tree import plot_tree
             </code>
           </pre>
         <hr class="hr" />
@@ -126,7 +126,7 @@
         <code class="language-python">
           mass_shootings_5 = mass_shootings_5.drop(columns=['Title', 'S#',
           'Incident Area', 'Summary', 'Fatalities', 'Injured', 'Age', 'Employeed
-          (Y/N)', 'Employed at', 'Latitude', 'Longitude'])</code
+          (Y/N)', 'Employed at', 'Latitude', 'Longitude', 'Policeman Killed'])</code
         >
         <p>
           Now we need to edit some of our columns because the data in them isn't
@@ -190,7 +190,7 @@ def fix_cause(cause):
           </code>
         </pre>
         <p>
-          Add these functions to your collab and run the following in order to
+          Add these functions to your colab and run the following in order to
           fix the columns:
         </p>
         <pre class="line-numbers">
@@ -289,7 +289,7 @@ def fix_cause(cause):
         </ul>
         <p>
           In order to effectively use this test we will put our data in a
-          contingency table. Contingency tables place one variable on one exis,
+          contingency table. Contingency tables place one variable on one axis,
           and another variable on the other. This format allows relationships
           between the data to be more identifiable. Click
           <a href="https://en.wikipedia.org/wiki/Contingency_table">here</a> to
@@ -328,7 +328,7 @@ def fix_cause(cause):
           that involve mental health issues. While other targets, "Family" and
           "Relationship (non-familial)", have a higher rate of shootings that
           don't involve mental health issues. Although there is evidence of
-          higher and lower occurences depending on the target based on this
+          higher and lower occurrences depending on the target based on this
           graph, it is not enough for us to conclude that there is some
           relationship. So, we must use the chi-squared test.
         </p>
@@ -359,7 +359,7 @@ def fix_cause(cause):
         </p>
         <p>
           Since it isn't below .05 we fail to reject our null hypothesis, so we
-          can't definitevily say that there is a connection between the two
+          can't definitively say that there is a connection between the two
           features based on this. So, there is no direct relation between the
           target and if the shooter has mental health issues.
         </p>
@@ -374,7 +374,7 @@ def fix_cause(cause):
         </p>
         <p>
           In order to do this, we are going to use a Mann-Whitney U test. This
-          is because the two features are independent from eachother and not
+          is because the two features are independent from each other and not
           normally distributed. This is once again a good test to use when you
           want to compare two features. To learn more about Mann-Whitney U test,
           click
@@ -384,7 +384,7 @@ def fix_cause(cause):
           >
         </p>
         <p>
-          Once again we are going to define our null and alternative hpothesis:
+          Once again we are going to define our null and alternative hypothesis:
         </p>
         <ul>
           <li>
@@ -400,7 +400,7 @@ def fix_cause(cause):
         </ul>
         <p>
           Before doing the test though lets try and visualize the relationship
-          with the use of a box plot. We'll start by seperating the opened and
+          with the use of a box plot. We'll start by separating the opened and
           closed data:
         </p>
         <pre class="line-numbers">
@@ -476,8 +476,8 @@ def fix_cause(cause):
         <p>
           For this analysis we want to compare the causes to the number of
           victims in a shooting. We also want to see how those causes compare to
-          each other in realtion to the number of victims that they have. The
-          causes are basically the reason why the shooter commited the crime. So
+          each other in relation to the number of victims that they have. The
+          causes are basically the reason why the shooter committed the crime. So
           things like "anger", "revenge", "domestic" disputes, etc.
         </p>
         <p>
@@ -527,7 +527,7 @@ def fix_cause(cause):
         <p>
           With this bar graph we can see the relationship between the different
           causes and how they differ from each other when it comes to the
-          average amount of victims harmed. There are definetly some causes that
+          average amount of victims harmed. There are definitely some causes that
           seem to cause much more harm than others, but we should use our ANOVA
           test in order to be sure.
         </p>
@@ -538,12 +538,12 @@ def fix_cause(cause):
         <ul>
           <li>
             <b>H<sub>0</sub></b
-            >: The means will be the same accross all groups, so the cause has
+            >: The means will be the same across all groups, so the cause has
             no affect on total victims.
           </li>
           <li>
             <b>H<sub>A</sub></b
-            >: The means won't be the same accross all groups, so the cause has
+            >: The means won't be the same across all groups, so the cause has
             an affect on total victims.
           </li>
         </ul>
@@ -655,7 +655,7 @@ def fix_cause(cause):
         <p>
           From this you can see that a lot of our data has a significant
           difference between features. This means that there is a meaningful
-          distinciton between the cause and the amount of victims for a lot of
+          distinction between the cause and the amount of victims for a lot of
           our categories. This means that the cause does cause some difference
           in the amount of victims resulting from the shooting, and here we can
           see which causes actually have that difference.
@@ -665,11 +665,11 @@ def fix_cause(cause):
         <p>
           After this analysis we can see that a lot of our data is categorical,
           and we were able to point out some relationships between those
-          categories. From our final analysis we can seethat the cause does have
+          categories. From our final analysis we can see that the cause does have
           an effect on the number of total victims. We were also able to gather
           from out second analysis that the location being open or closed had an
           effect on the number of victims, with open locations having slightly
-          more. In thenext section we will use these insights in order to
+          more. In the next section we will use these insights in order to
           determine what kind of machine learning analysis and function we will
           use.
         </p>
@@ -698,7 +698,7 @@ def fix_cause(cause):
         </p>
         <p>
           First we have to decide what Machine Learning. Since we want to
-          predict a real valued continous feature, we should select some kind of
+          predict a real valued continuous feature, we should select some kind of
           regression model. I think that a Decision Tree would be our best bet
           because of the nature of our data, and what we want to do with it.
           Given some categorical data we want to make a decision/estimate about
@@ -791,7 +791,7 @@ def fix_cause(cause):
         <h3>Training our Model</h3>
         <p>
           Now we have to use our training and test data in order to train and
-          evaluate our model. In order evaulate our model we will take a look at
+          evaluate our model. In order evaluate our model we will take a look at
           its
           <a
             href="https://medium.com/@kohlishivam5522/understanding-a-classification-report-for-your-machine-learning-model-88815e2ce397"
@@ -849,7 +849,7 @@ def fix_cause(cause):
           we'll stick with it for now.
         </p>
         <p>
-          Lets take a look at our classifcation report again to see if anything
+          Lets take a look at our classification report again to see if anything
           else improved:
         </p>
         <pre class="line-numbers">
@@ -908,8 +908,8 @@ def fix_cause(cause):
         </p>
         <p>
           This transparency that comes with decision trees is very valuable
-          since it has alowed us to gain some more insights into the decision
-          mkaing/classification proccess.
+          since it has allowed us to gain some more insights into the decision
+          making/classification process.
         </p>
       </div>
       <hr />
@@ -921,11 +921,11 @@ def fix_cause(cause):
         </p>
         <ol>
           <li>
-            We were able to indentify a relationship between whether the
+            We were able to identify a relationship between whether the
             location is opened or closed and the amount of victims harmed.
           </li>
           <li>
-            We were able to indentify a meaningful distinciton between the cause
+            We were able to identify a meaningful distinction between the cause
             and the amount of victims for a lot of our categories.
           </li>
         </ol>
@@ -933,7 +933,7 @@ def fix_cause(cause):
           With these insights we developed were able to Machine Learning Model,
           which although not working very well, was able to still give some
           valuable experience and information about that step in the data
-          science proccess.
+          science process.
         </p>
         <p>
           We are still a long road away from a solid solution to this issue that
