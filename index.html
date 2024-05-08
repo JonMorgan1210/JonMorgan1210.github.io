@@ -13,6 +13,8 @@
         <h1>An Evaluation of Shootings in the United States</h1>
         <h3>Jonathan Morgan</h3>
         <h3>Spring 2024 Data Science Project</h3>
+        <h4>Member 1(and only): Jonathan Morgan, Contribution: 100% (did to everything).</h4>
+        <p>I did everything in the project, all html/css and colab/coding</p>
       </div>
       <hr />
       <div id="intro">
@@ -817,19 +819,127 @@ def fix_cause(cause):
           <a
             href="https://c3.ai/glossary/machine-learning/precision/#:~:text=Precision%20is%20one%20indicator%20of,the%20number%20of%20false%20positives)."
             >precise</a
-          >. Especially when it comes to higher Victim Counts. This may be
-          because higher victim totals are more rare, making them easier to
-          predict that the more average victim totals.
+          >. Especially when it comes to higher Victim Counts.
         </p>
-        <p></p>
+        <hr class="hr" />
+        <h3>Fine Tuning Our Model</h3>
+        <p>
+          Since our models performance wasn't very good, lets try to improve it
+          via fine tuning. The following code should help fine tune our decision
+          tree and improve performance:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            for criterion in ['gini', 'entropy']:
+              for max_depth in [2,3,4,5,6]:
+                  for min_samples_leaf in [5, 10, 20, 30]:
+                      model = DecisionTreeClassifier(max_depth=max_depth, criterion=criterion, min_samples_leaf=min_samples_leaf)
+                      model.fit(X_train, y_train)
+                      test_predictions = model.predict(X_test)
+                      test_acc = accuracy_score(y_test, test_predictions)
+                      if test_acc > best_acc:
+                          best_acc = test_acc
+        
+            print(best_acc)
+          </code>
+        </pre>
+        <p>
+          Out performance still isn't great,
+          <code>0.29545454545454547 </code> but is better than it was before, so
+          we'll stick with it for now.
+        </p>
+        <p>
+          Lets take a look at our classifcation report again to see if anything
+          else improved:
+        </p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_pred, y_test)
+            
+            print("Accuracy of Model: "+str(accuracy))
+            print('Classification Report: ')
+            print(classification_report(y_test, y_pred, zero_division=1))
+          </code>
+        </pre>
+        <p>Output:</p>
+        <img style="height: 30rem" src="imgs/tuned_report.jpg" alt="" />
+        <p>
+          As you can see it's mostly the same, but our precision did improve a
+          decent amount. The higher precision levels, especially with some
+          larger Victim Totals could be attributed to those kinds of shootings
+          being more rare, making them easier to predict that the more average
+          victim totals.
+        </p>
       </div>
       <hr />
       <div id="visualization">
         <h2>Visualization</h2>
+        <p>
+          Lets plot our decision tree to see what it looks like. This is one of
+          the benefits of a decision tree, it is fairly simple to look at and
+          understand since it works in a similar(ish) way to the human brain.
+          Looking at a Decision Tree can help us understand what the "thought"
+          process is like for the model.
+        </p>
+        <p>The following code will display the model:</p>
+        <pre class="line-numbers">
+          <code class="language-python">
+            fig = plt.figure(figsize=((25,20)))
+            plot_tree(model, 
+                        feature_names = data_x_encoded.columns,
+                        impurity=False,
+                        proportion=True,
+                        filled=True)
+          </code>
+        </pre>
+        <p>Output:</p>
+        <img src="imgs/DTree.png" alt="" />
+        <p>
+          This visualization provides some insights into how the tree makes its
+          decisions. We can see here how it decided to split the features. Which
+          is very important when building a decision tree. This is very
+          important because the split depends on the level of entropy resulting
+          from it. Based off of the first split with Mental Health issues, we
+          can tell that the tree is pretty confident in classifying the total
+          victims based on just that category. When it comes to unknown mental
+          health issues the tree seems to need to also check the open/close
+          location feature before making a decision.
+        </p>
+        <p>
+          This transparency that comes with decision trees is very valuable
+          since it has alowed us to gain some more insights into the decision
+          mkaing/classification proccess.
+        </p>
       </div>
       <hr />
       <div id="conclusion">
         <h2>Conclusion</h2>
+        <p>
+          Although we weren't able to pinpoint a solution as much as I hoped,
+          there were some valuable insights that I believe we about shootings:
+        </p>
+        <ol>
+          <li>
+            We were able to indentify a relationship between whether the
+            location is opened or closed and the amount of victims harmed.
+          </li>
+          <li>
+            We were able to indentify a meaningful distinciton between the cause
+            and the amount of victims for a lot of our categories.
+          </li>
+        </ol>
+        <p>
+          With these insights we developed were able to Machine Learning Model,
+          which although not working very well, was able to still give some
+          valuable experience and information about that step in the data
+          science proccess.
+        </p>
+        <p>
+          We are still a long road away from a solid solution to this issue that
+          plagues the US, but through the use of more data science techniques
+          and tools, a possible solution could be found much quicker.
+        </p>
       </div>
     </div>
     <script src="prism-correct.js"></script>
